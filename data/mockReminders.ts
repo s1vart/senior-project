@@ -1,0 +1,48 @@
+import { Reminder } from "../types";
+
+export const mockReminders: Reminder[] = [
+  {
+    id: "r1",
+    plantId: "1",
+    userId: "user-1",
+    careType: "water",
+    frequencyDays: 7,
+    timeOfDay: "09:00",
+    nextDue: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+    isActive: true,
+    createdAt: "2025-03-01T00:00:00Z",
+  },
+  {
+    id: "r2",
+    plantId: "2",
+    userId: "user-1",
+    careType: "water",
+    frequencyDays: 5,
+    timeOfDay: "08:00",
+    nextDue: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+    isActive: true,
+    createdAt: "2025-03-05T00:00:00Z",
+  },
+  {
+    id: "r3",
+    plantId: "3",
+    userId: "user-1",
+    careType: "water",
+    frequencyDays: 14,
+    timeOfDay: "10:00",
+    nextDue: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+    isActive: true,
+    createdAt: "2025-02-20T00:00:00Z",
+  },
+  {
+    id: "r4",
+    plantId: "1",
+    userId: "user-1",
+    careType: "fertilize",
+    frequencyDays: 30,
+    timeOfDay: "09:00",
+    nextDue: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString(),
+    isActive: true,
+    createdAt: "2025-03-01T00:00:00Z",
+  },
+];
