@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, FlatList } from "react-native";
+import { View, Text, FlatList, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -27,25 +27,39 @@ export default function CatalogScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-dark-bg" edges={["top"]}>
-      <View className="px-5 pt-2 pb-4">
-        <View className="flex-row items-center justify-between mb-4">
-          <Text className="text-white text-2xl font-bold">
-            Smart Care Schedule
-          </Text>
-          <Ionicons name="notifications-outline" size={24} color="#9CA3AF" />
+      <View className="px-6 pt-4 pb-5">
+        <View className="flex-row items-center justify-between">
+          <View className="flex-1 mr-4">
+            <Text className="text-white text-2xl font-bold">
+              Smart Care Schedule
+            </Text>
+            <Text className="text-gray-text text-sm mt-1">
+              {mockPlants.length} plant{mockPlants.length !== 1 ? "s" : ""} in your garden
+            </Text>
+          </View>
+          <TouchableOpacity
+            onPress={() => router.push("/(tabs)/catalog/manage")}
+            className="w-10 h-10 rounded-full bg-dark-card border border-dark-border items-center justify-center"
+            activeOpacity={0.7}
+          >
+            <Ionicons name="notifications-outline" size={18} color="#9CA3AF" />
+          </TouchableOpacity>
         </View>
 
-        <TabSelector
-          tabs={["Today", "Upcoming"]}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-        />
+        <View className="mt-5">
+          <TabSelector
+            tabs={["Today", "Upcoming"]}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+          />
+        </View>
       </View>
 
       <FlatList
         data={mockPlants}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20 }}
+        contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 32 }}
+        ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
         renderItem={({ item }) => {
           const reminderLabel = getNextReminderLabel(item.id);
           return (
@@ -54,7 +68,7 @@ export default function CatalogScreen() {
                 <Badge
                   label={reminderLabel}
                   variant="info"
-                  className="mb-2"
+                  className="mb-3"
                 />
               )}
               <PlantCard

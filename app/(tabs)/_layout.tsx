@@ -27,8 +27,12 @@ export default function TabsLayout() {
         name="catalog"
         options={{
           title: "My Plants",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="leaf" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={focused ? "leaf" : "leaf-outline"}
+              size={size}
+              color={color}
+            />
           ),
         }}
       />
@@ -36,8 +40,12 @@ export default function TabsLayout() {
         name="add"
         options={{
           title: "Identify",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="search" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={focused ? "search" : "search-outline"}
+              size={size}
+              color={color}
+            />
           ),
         }}
       />
@@ -45,8 +53,12 @@ export default function TabsLayout() {
         name="resources"
         options={{
           title: "Resources",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="book" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={focused ? "book" : "book-outline"}
+              size={size}
+              color={color}
+            />
           ),
         }}
       />
@@ -54,8 +66,12 @@ export default function TabsLayout() {
         name="settings"
         options={{
           title: "Settings",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="settings-sharp" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={focused ? "settings-sharp" : "settings-outline"}
+              size={size}
+              color={color}
+            />
           ),
         }}
       />

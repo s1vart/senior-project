@@ -1,5 +1,12 @@
 import { Plant } from "../types";
 
+// Helper to get a date string N days ago from now
+function daysAgo(n: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return d.toISOString().split("T")[0];
+}
+
 export const mockPlants: Plant[] = [
   {
     id: "1",
@@ -9,7 +16,7 @@ export const mockPlants: Plant[] = [
     scientificName: "Gasteria brachyphylla",
     confidence: 0.82,
     photoUrl: "https://images.unsplash.com/photo-1509423350716-97f9360b4e09?w=400",
-    lastWatered: "2025-03-19",
+    lastWatered: daysAgo(2),
     waterAmountMl: 50,
     directSunlight: false,
     sunlightHours: 4,
@@ -18,7 +25,7 @@ export const mockPlants: Plant[] = [
     completionPercent: 82,
     notes: "My favorite little succulent",
     createdAt: "2025-03-01T00:00:00Z",
-    updatedAt: "2025-03-24T00:00:00Z",
+    updatedAt: "2026-02-04T00:00:00Z",
   },
   {
     id: "2",
@@ -28,7 +35,7 @@ export const mockPlants: Plant[] = [
     scientificName: "Pilea peperomioides",
     confidence: 0.91,
     photoUrl: "https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=400",
-    lastWatered: "2025-03-21",
+    lastWatered: daysAgo(5),
     waterAmountMl: 100,
     directSunlight: false,
     sunlightHours: 6,
@@ -36,7 +43,7 @@ export const mockPlants: Plant[] = [
     windowOrientation: "East",
     completionPercent: 75,
     createdAt: "2025-03-05T00:00:00Z",
-    updatedAt: "2025-03-24T00:00:00Z",
+    updatedAt: "2026-02-01T00:00:00Z",
   },
   {
     id: "3",
@@ -46,7 +53,7 @@ export const mockPlants: Plant[] = [
     scientificName: "Dracaena trifasciata",
     confidence: 0.95,
     photoUrl: "https://images.unsplash.com/photo-1593482892540-72a8ce16401c?w=400",
-    lastWatered: "2025-03-17",
+    lastWatered: daysAgo(12),
     waterAmountMl: 150,
     directSunlight: true,
     sunlightHours: 8,
@@ -55,6 +62,6 @@ export const mockPlants: Plant[] = [
     completionPercent: 90,
     notes: "Thrives on neglect",
     createdAt: "2025-02-20T00:00:00Z",
-    updatedAt: "2025-03-24T00:00:00Z",
+    updatedAt: "2026-01-25T00:00:00Z",
   },
 ];

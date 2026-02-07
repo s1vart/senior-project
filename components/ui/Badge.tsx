@@ -11,14 +11,14 @@ export function Badge({ label, variant = "default", className = "" }: BadgeProps
     default: "bg-dark-border",
     success: "bg-green-600/20",
     warning: "bg-yellow-600/20",
-    info: "bg-violet-accent/20",
+    info: "bg-sage-accent/20",
   };
 
   const textClasses = {
     default: "text-gray-text",
     success: "text-green-400",
     warning: "text-yellow-400",
-    info: "text-violet-light",
+    info: "text-sage-light",
   };
 
   return (

@@ -3,6 +3,10 @@ import { useEffect, useCallback, useState } from "react";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
+import {
+  SafeAreaProvider,
+  initialWindowMetrics,
+} from "react-native-safe-area-context";
 import { AuthContext, AuthContextType } from "../hooks/useAuth";
 
 SplashScreen.preventAutoHideAsync();
@@ -34,19 +38,21 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, user, login, signup, logout }}>
-      <StatusBar style="light" />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: "#1C1C1E" },
-          animation: "fade",
-        }}
-      >
-        <Stack.Screen name="index" />
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="(auth)" />
-      </Stack>
-    </AuthContext.Provider>
+    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+      <AuthContext.Provider value={{ isLoggedIn, user, login, signup, logout }}>
+        <StatusBar style="light" />
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: "#1C1C1E" },
+            animation: "fade",
+          }}
+        >
+          <Stack.Screen name="index" />
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="(auth)" />
+        </Stack>
+      </AuthContext.Provider>
+    </SafeAreaProvider>
   );
 }

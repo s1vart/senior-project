@@ -11,7 +11,7 @@ export function PlantSearchResultCard({ result, onPress }: PlantSearchResultProp
   return (
     <TouchableOpacity
       onPress={onPress}
-      className="flex-row items-center bg-dark-card rounded-2xl p-3 mb-3"
+      className="flex-row items-center bg-dark-card border border-dark-border rounded-2xl p-3 mb-3"
       activeOpacity={0.7}
     >
       <Image

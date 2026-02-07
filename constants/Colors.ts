@@ -2,8 +2,8 @@ export const Colors = {
   darkBg: "#1C1C1E",
   darkCard: "#2C2C2E",
   darkBorder: "#3A3A3C",
-  violetAccent: "#7C3AED",
-  violetLight: "#8B5CF6",
+  sageAccent: "#6B8F71",
+  sageLight: "#7DA383",
   grayText: "#9CA3AF",
   white: "#FFFFFF",
   black: "#000000",
@@ -13,7 +13,7 @@ export const Colors = {
   orange: "#F97316",
 
   tabBar: {
-    active: "#7C3AED",
+    active: "#6B8F71",
     inactive: "#9CA3AF",
     background: "#1C1C1E",
     border: "#3A3A3C",

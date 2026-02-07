@@ -6,6 +6,7 @@ export default function AddLayout() {
       screenOptions={{
         headerShown: false,
         contentStyle: { backgroundColor: "#1C1C1E" },
+        animation: "fade",
       }}
     />
   );

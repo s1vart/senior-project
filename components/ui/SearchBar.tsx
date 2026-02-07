@@ -13,7 +13,7 @@ export function SearchBar({
   placeholder = "Search...",
 }: SearchBarProps) {
   return (
-    <View className="flex-row items-center bg-dark-card rounded-xl px-4 py-3">
+    <View className="flex-row items-center bg-dark-card border border-dark-border rounded-xl px-4 py-3">
       <Ionicons name="search" size={18} color="#9CA3AF" />
       <TextInput
         value={value}

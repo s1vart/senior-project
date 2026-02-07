@@ -9,33 +9,54 @@ interface PlantCardProps {
   onPress: () => void;
 }
 
+function getWaterStatus(days: number): {
+  color: string;
+  label: string;
+} {
+  if (days <= 3) return { color: "#22C55E", label: "Healthy" };
+  if (days <= 7) return { color: "#EAB308", label: "Due soon" };
+  return { color: "#EF4444", label: "Overdue" };
+}
+
 export function PlantCard({ plant, daysAgo, onPress }: PlantCardProps) {
   const daysSinceWatered = daysAgo ?? getDaysSinceWatered(plant.lastWatered);
+  const waterStatus = getWaterStatus(daysSinceWatered);
 
   return (
     <TouchableOpacity
       onPress={onPress}
-      className="flex-row items-center bg-dark-card rounded-2xl p-4 mb-3"
+      className="bg-dark-card border border-dark-border rounded-2xl"
       activeOpacity={0.7}
+      style={{ borderLeftWidth: 3, borderLeftColor: waterStatus.color }}
     >
-      <PlantPhoto uri={plant.photoUrl} size={56} />
-      <View className="flex-1 ml-3">
-        <Text className="text-white text-base font-semibold">
-          {plant.nickname}
-        </Text>
-        <Text className="text-gray-text text-sm">
-          {plant.commonName}
-        </Text>
-      </View>
-      <View className="items-end">
-        <View className="flex-row items-center">
-          <Ionicons name="water" size={14} color="#9CA3AF" />
-          <Text className="text-gray-text text-sm ml-1">
-            {plant.waterAmountMl ? `${(plant.waterAmountMl / 1000).toFixed(1)} cup` : "--"}
+      <View className="flex-row items-center px-4 py-4">
+        <PlantPhoto uri={plant.photoUrl} size={52} />
+        <View className="flex-1 ml-4">
+          <Text className="text-white text-base font-bold">
+            {plant.nickname}
+          </Text>
+          <Text className="text-gray-text text-sm mt-0.5">
+            {plant.commonName}
           </Text>
         </View>
-        <Text className="text-gray-text text-xs mt-1">
-          {daysSinceWatered} days ago
+        <Ionicons name="chevron-forward" size={16} color="#3A3A3C" />
+      </View>
+
+      <View className="flex-row items-center px-4 pb-3 pt-0">
+        <View
+          className="flex-row items-center rounded-full px-2.5 py-1"
+          style={{ backgroundColor: `${waterStatus.color}15` }}
+        >
+          <Ionicons name="water" size={12} color={waterStatus.color} />
+          <Text
+            className="text-xs font-semibold ml-1"
+            style={{ color: waterStatus.color }}
+          >
+            {waterStatus.label}
+          </Text>
+        </View>
+        <Text className="text-gray-text text-xs ml-3">
+          Watered {daysSinceWatered}d ago
         </Text>
       </View>
     </TouchableOpacity>

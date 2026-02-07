@@ -19,7 +19,7 @@ export function Toggle({ label, value, onValueChange, description }: ToggleProps
       <Switch
         value={value}
         onValueChange={onValueChange}
-        trackColor={{ false: "#3A3A3C", true: "#7C3AED" }}
+        trackColor={{ false: "#3A3A3C", true: "#6B8F71" }}
         thumbColor="#FFFFFF"
       />
     </View>

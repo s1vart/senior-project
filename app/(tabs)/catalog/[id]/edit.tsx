@@ -48,7 +48,7 @@ export default function EditPlantScreen() {
           Edit Plant Details
         </Text>
         <TouchableOpacity onPress={() => router.back()}>
-          <Text className="text-violet-accent font-semibold">Save</Text>
+          <Text className="text-sage-accent font-semibold">Save</Text>
         </TouchableOpacity>
       </View>
 
@@ -58,7 +58,7 @@ export default function EditPlantScreen() {
         <View className="items-center mb-6">
           <PlantPhoto uri={plant.photoUrl} size={100} />
           {plant.completionPercent !== undefined && (
-            <Text className="text-violet-light text-sm font-semibold mt-2">
+            <Text className="text-sage-light text-sm font-semibold mt-2">
               {plant.completionPercent}% Complete
             </Text>
           )}

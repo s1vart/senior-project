@@ -9,7 +9,7 @@ interface PlantPhotoProps {
 export function PlantPhoto({
   uri,
   size = 60,
-  borderColor = "#7C3AED",
+  borderColor = "#6B8F71",
 }: PlantPhotoProps) {
   return (
     <View

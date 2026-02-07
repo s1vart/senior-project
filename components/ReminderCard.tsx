@@ -14,7 +14,7 @@ export function ReminderCard({
   title,
   description,
   icon,
-  iconColor = "#7C3AED",
+  iconColor = "#6B8F71",
   actionLabel = "Select Plants",
   onAction,
 }: ReminderCardProps) {
@@ -35,10 +35,10 @@ export function ReminderCard({
       {onAction && (
         <TouchableOpacity
           onPress={onAction}
-          className="mt-3 border border-violet-accent rounded-xl py-2 items-center"
+          className="mt-3 border border-sage-accent rounded-xl py-2 items-center"
           activeOpacity={0.7}
         >
-          <Text className="text-violet-accent font-semibold text-sm">
+          <Text className="text-sage-accent font-semibold text-sm">
             {actionLabel}
           </Text>
         </TouchableOpacity>

@@ -8,13 +8,13 @@ interface TabSelectorProps {
 
 export function TabSelector({ tabs, activeTab, onTabChange }: TabSelectorProps) {
   return (
-    <View className="flex-row bg-dark-card rounded-xl p-1">
+    <View className="flex-row bg-dark-card border border-dark-border rounded-xl p-1">
       {tabs.map((tab) => (
         <TouchableOpacity
           key={tab}
           onPress={() => onTabChange(tab)}
-          className={`flex-1 py-2 rounded-lg items-center ${
-            activeTab === tab ? "bg-violet-accent" : ""
+          className={`flex-1 py-2.5 rounded-lg items-center ${
+            activeTab === tab ? "bg-sage-accent" : ""
           }`}
           activeOpacity={0.7}
         >

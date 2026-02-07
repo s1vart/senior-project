@@ -30,7 +30,7 @@ export default function LoginScreen() {
         className="flex-1 justify-center px-6"
       >
         <View className="items-center mb-10">
-          <View className="w-20 h-20 rounded-2xl bg-violet-accent items-center justify-center mb-4">
+          <View className="w-20 h-20 rounded-2xl bg-sage-accent items-center justify-center mb-4">
             <Ionicons name="leaf" size={40} color="white" />
           </View>
           <Text className="text-white text-3xl font-bold">Plant OS</Text>
@@ -66,7 +66,7 @@ export default function LoginScreen() {
         >
           <Text className="text-gray-text">
             Don't have an account?{" "}
-            <Text className="text-violet-accent font-semibold">Sign Up</Text>
+            <Text className="text-sage-accent font-semibold">Sign Up</Text>
           </Text>
         </TouchableOpacity>
       </KeyboardAvoidingView>
