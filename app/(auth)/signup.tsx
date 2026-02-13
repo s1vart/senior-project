@@ -2,33 +2,72 @@ import { useState } from "react";
 import {
   View,
   Text,
+  ScrollView,
   KeyboardAvoidingView,
   Platform,
   TouchableOpacity,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../hooks/useAuth";
 import { TextField } from "../../components/ui/TextField";
 import { Button } from "../../components/ui/Button";
 
 export default function SignupScreen() {
-  const { signup } = useAuth();
+  const { signup, loading, error, clearError } = useAuth();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [localError, setLocalError] = useState<string | null>(null);
+  const [emailSent, setEmailSent] = useState(false);
 
-  const handleSignup = () => {
-    signup(email, password);
+  const displayError = localError || error;
+
+  const handleSignup = async () => {
+    setLocalError(null);
+    if (!email || !password || !confirmPassword) {
+      setLocalError("Please fill in all fields");
+      return;
+    }
+    if (password.length < 6) {
+      setLocalError("Password must be at least 6 characters");
+      return;
+    }
+    if (password !== confirmPassword) {
+      setLocalError("Passwords do not match");
+      return;
+    }
+    const success = await signup(email, password);
+    if (success) setEmailSent(true);
+  };
+
+  const handleTextChange = () => {
+    setLocalError(null);
+    setEmailSent(false);
+    clearError();
+  };
+
+  const navigateBack = () => {
+    clearError();
+    router.back();
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-dark-bg">
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        className="flex-1 justify-center px-6"
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      className="flex-1 bg-dark-bg"
+    >
+      <ScrollView
+        contentContainerStyle={{
+          paddingHorizontal: 24,
+          paddingTop: insets.top + 40,
+          paddingBottom: insets.bottom + 40,
+        }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
         <View className="items-center mb-10">
           <View className="w-20 h-20 rounded-2xl bg-sage-accent items-center justify-center mb-4">
@@ -40,10 +79,29 @@ export default function SignupScreen() {
           </Text>
         </View>
 
+        {displayError && (
+          <View className="bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3 mb-4">
+            <Text className="text-red-400 text-sm text-center">
+              {displayError}
+            </Text>
+          </View>
+        )}
+
+        {emailSent && !displayError && (
+          <View className="bg-green-500/10 border border-green-500/30 rounded-xl px-4 py-3 mb-4">
+            <Text className="text-green-400 text-sm text-center">
+              Check your email to confirm your account, then log in
+            </Text>
+          </View>
+        )}
+
         <TextField
           label="Email"
           value={email}
-          onChangeText={setEmail}
+          onChangeText={(text) => {
+            handleTextChange();
+            setEmail(text);
+          }}
           placeholder="you@example.com"
           keyboardType="email-address"
           autoCapitalize="none"
@@ -53,7 +111,10 @@ export default function SignupScreen() {
         <TextField
           label="Password"
           value={password}
-          onChangeText={setPassword}
+          onChangeText={(text) => {
+            handleTextChange();
+            setPassword(text);
+          }}
           placeholder="Create password"
           secureTextEntry
           icon={<Ionicons name="lock-closed" size={18} color="#9CA3AF" />}
@@ -62,16 +123,24 @@ export default function SignupScreen() {
         <TextField
           label="Confirm Password"
           value={confirmPassword}
-          onChangeText={setConfirmPassword}
+          onChangeText={(text) => {
+            handleTextChange();
+            setConfirmPassword(text);
+          }}
           placeholder="Confirm password"
           secureTextEntry
           icon={<Ionicons name="lock-closed" size={18} color="#9CA3AF" />}
         />
 
-        <Button title="Sign Up" onPress={handleSignup} className="mt-2" />
+        <Button
+          title="Sign Up"
+          onPress={handleSignup}
+          loading={loading}
+          className="mt-2"
+        />
 
         <TouchableOpacity
-          onPress={() => router.back()}
+          onPress={navigateBack}
           className="mt-4 items-center"
         >
           <Text className="text-gray-text">
@@ -79,7 +148,9 @@ export default function SignupScreen() {
             <Text className="text-sage-accent font-semibold">Log In</Text>
           </Text>
         </TouchableOpacity>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+
+        <View style={{ height: 300 }} />
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
