@@ -1,67 +1,66 @@
 import "../global.css";
-import { useEffect, useCallback, useState } from "react";
-import { Stack } from "expo-router";
+import { useEffect } from "react";
+import { Stack, useSegments, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
 import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
-import { AuthContext, AuthContextType } from "../hooks/useAuth";
+import { AuthProvider } from "../hooks/AuthProvider";
+import { useAuth } from "../hooks/useAuth";
 
 SplashScreen.preventAutoHideAsync();
 
-function RootLayoutNav() {
-  const insets = useSafeAreaInsets();
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
-  const [user, setUser] = useState<AuthContextType["user"]>({
-    id: "user-1",
-    email: "demo@plantos.app",
-  });
+function AuthGuard({ children }: { children: React.ReactNode }) {
+  const { isLoggedIn, loading } = useAuth();
+  const segments = useSegments();
+  const router = useRouter();
 
   useEffect(() => {
-    // Wait until safe area insets are measured before hiding splash screen.
-    // This prevents the content from briefly rendering behind the status
-    // bar / notch on Android before the insets kick in.
+    if (loading) return;
+
+    const inAuthGroup = segments[0] === "(auth)";
+
+    if (!isLoggedIn && !inAuthGroup) {
+      router.replace("/(auth)/login");
+    } else if (isLoggedIn && inAuthGroup) {
+      router.replace("/(tabs)/catalog");
+    }
+  }, [isLoggedIn, loading, segments]);
+
+  return <>{children}</>;
+}
+
+function RootLayoutNav() {
+  const insets = useSafeAreaInsets();
+
+  useEffect(() => {
     if (insets.top > 0) {
       SplashScreen.hideAsync();
     } else {
-      // Fallback for devices/emulators that may report 0 insets
       const timeout = setTimeout(() => SplashScreen.hideAsync(), 300);
       return () => clearTimeout(timeout);
     }
   }, [insets.top]);
 
-  const login = useCallback((email: string, _password: string) => {
-    setUser({ id: "user-1", email });
-    setIsLoggedIn(true);
-  }, []);
-
-  const signup = useCallback((email: string, _password: string) => {
-    setUser({ id: "user-1", email });
-    setIsLoggedIn(true);
-  }, []);
-
-  const logout = useCallback(() => {
-    setUser(null);
-    setIsLoggedIn(false);
-  }, []);
-
   return (
-    <AuthContext.Provider value={{ isLoggedIn, user, login, signup, logout }}>
-      <StatusBar style="light" />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: "#1C1C1E" },
-          animation: "fade",
-        }}
-      >
-        <Stack.Screen name="index" />
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="(auth)" />
-      </Stack>
-    </AuthContext.Provider>
+    <AuthProvider>
+      <AuthGuard>
+        <StatusBar style="light" />
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: "#1C1C1E" },
+            animation: "fade",
+          }}
+        >
+          <Stack.Screen name="index" />
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="(auth)" />
+        </Stack>
+      </AuthGuard>
+    </AuthProvider>
   );
 }
 

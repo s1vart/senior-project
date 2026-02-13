@@ -14,21 +14,22 @@ import { useAuth } from "../../hooks/useAuth";
 import { TextField } from "../../components/ui/TextField";
 import { Button } from "../../components/ui/Button";
 
-export default function LoginScreen() {
-  const { login, loading, error, clearError } = useAuth();
+export default function ForgotPasswordScreen() {
+  const { resetPassword, loading, error, clearError } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [sent, setSent] = useState(false);
 
-  const handleLogin = async () => {
-    if (!email || !password) return;
-    await login(email, password);
+  const handleReset = async () => {
+    if (!email) return;
+    const success = await resetPassword(email);
+    if (success) setSent(true);
   };
 
-  const navigateTo = (path: string) => {
+  const navigateBack = () => {
     clearError();
-    router.push(path as any);
+    router.back();
   };
 
   return (
@@ -47,11 +48,11 @@ export default function LoginScreen() {
       >
         <View className="items-center mb-10">
           <View className="w-20 h-20 rounded-2xl bg-sage-accent items-center justify-center mb-4">
-            <Ionicons name="leaf" size={40} color="white" />
+            <Ionicons name="mail-open" size={40} color="white" />
           </View>
-          <Text className="text-white text-3xl font-bold">Plant OS</Text>
-          <Text className="text-gray-text text-base mt-1">
-            Your personal plant companion
+          <Text className="text-white text-3xl font-bold">Reset Password</Text>
+          <Text className="text-gray-text text-base mt-1 text-center">
+            Enter your email and we'll send you a link to reset your password
           </Text>
         </View>
 
@@ -61,11 +62,20 @@ export default function LoginScreen() {
           </View>
         )}
 
+        {sent && !error && (
+          <View className="bg-green-500/10 border border-green-500/30 rounded-xl px-4 py-3 mb-4">
+            <Text className="text-green-400 text-sm text-center">
+              Check your email for a password reset link
+            </Text>
+          </View>
+        )}
+
         <TextField
           label="Email"
           value={email}
           onChangeText={(text) => {
             clearError();
+            setSent(false);
             setEmail(text);
           }}
           placeholder="you@example.com"
@@ -74,40 +84,18 @@ export default function LoginScreen() {
           icon={<Ionicons name="mail" size={18} color="#9CA3AF" />}
         />
 
-        <TextField
-          label="Password"
-          value={password}
-          onChangeText={(text) => {
-            clearError();
-            setPassword(text);
-          }}
-          placeholder="Enter password"
-          secureTextEntry
-          icon={<Ionicons name="lock-closed" size={18} color="#9CA3AF" />}
-        />
-
         <Button
-          title="Log In"
-          onPress={handleLogin}
+          title="Send Reset Link"
+          onPress={handleReset}
           loading={loading}
           className="mt-2"
         />
 
         <TouchableOpacity
-          onPress={() => navigateTo("/(auth)/forgot-password")}
-          className="mt-3 items-center"
-        >
-          <Text className="text-sage-accent text-sm">Forgot Password?</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={() => navigateTo("/(auth)/signup")}
+          onPress={navigateBack}
           className="mt-4 items-center"
         >
-          <Text className="text-gray-text">
-            Don't have an account?{" "}
-            <Text className="text-sage-accent font-semibold">Sign Up</Text>
-          </Text>
+          <Text className="text-sage-accent text-sm">Back to Login</Text>
         </TouchableOpacity>
 
         <View style={{ height: 300 }} />

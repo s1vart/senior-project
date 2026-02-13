@@ -1,19 +1,28 @@
 import { createContext, useContext } from "react";
+import type { User } from "@supabase/supabase-js";
 
 export interface AuthContextType {
   isLoggedIn: boolean;
-  user: { id: string; email: string } | null;
-  login: (email: string, password: string) => void;
-  signup: (email: string, password: string) => void;
-  logout: () => void;
+  user: User | null;
+  loading: boolean;
+  error: string | null;
+  login: (email: string, password: string) => Promise<void>;
+  signup: (email: string, password: string) => Promise<boolean>;
+  logout: () => Promise<void>;
+  resetPassword: (email: string) => Promise<boolean>;
+  clearError: () => void;
 }
 
 export const AuthContext = createContext<AuthContextType>({
-  isLoggedIn: true,
-  user: { id: "user-1", email: "demo@plantos.app" },
-  login: () => {},
-  signup: () => {},
-  logout: () => {},
+  isLoggedIn: false,
+  user: null,
+  loading: true,
+  error: null,
+  login: async () => {},
+  signup: async () => false,
+  logout: async () => {},
+  resetPassword: async () => false,
+  clearError: () => {},
 });
 
 export function useAuth() {

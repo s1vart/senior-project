@@ -24,6 +24,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       backgroundColor: "#6B8F71",
     },
     edgeToEdgeEnabled: true,
+    softwareKeyboardLayoutMode: "resize",
   },
   web: {
     favicon: "./assets/favicon.png",
