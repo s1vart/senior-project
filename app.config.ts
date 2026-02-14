@@ -29,5 +29,15 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   web: {
     favicon: "./assets/favicon.png",
   },
-  plugins: ["expo-router", "expo-web-browser"],
+  plugins: [
+    "expo-router",
+    "expo-web-browser",
+    [
+      "expo-image-picker",
+      {
+        cameraPermission: "Plant OS needs camera access to photograph your plants.",
+        photosPermission: "Plant OS needs photo library access to select plant photos.",
+      },
+    ],
+  ],
 });
