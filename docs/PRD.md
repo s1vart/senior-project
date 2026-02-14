@@ -8,7 +8,7 @@ Plant OS is a mobile app that helps home plant owners identify, catalog, and car
 
 ## 2. Target Users
 
-- Home plant owners who struggle to keep plants alive due to misidentification or inconsistent care
+- Plant owners who struggle to keep plants alive due to misidentification or inconsistent care
 - Users who want a single place to track all their plants and care schedules
 - Users who want science-based guidance rather than unreliable internet advice
 
