@@ -94,6 +94,21 @@ export default function ConfirmPlantScreen() {
           </View>
         </Card>
 
+        {confidence < 0.4 && (
+          <View className="flex-row items-start bg-yellow-500/10 rounded-xl p-4 mb-6 border border-yellow-500/30">
+            <Ionicons
+              name="alert-circle"
+              size={20}
+              color="#EAB308"
+              style={{ marginTop: 1 }}
+            />
+            <Text className="text-yellow-400 text-sm ml-2 flex-1 leading-5">
+              This identification has low confidence. The plant may be misidentified
+              — consider verifying with additional photos or sources.
+            </Text>
+          </View>
+        )}
+
         {/* Nickname input */}
         <Text className="text-gray-text text-xs font-semibold uppercase tracking-wider mb-3 ml-1">
           Give it a name

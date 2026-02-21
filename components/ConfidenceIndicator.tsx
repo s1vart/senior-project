@@ -8,8 +8,15 @@ interface ConfidenceIndicatorProps {
 export function ConfidenceIndicator({ confidence }: ConfidenceIndicatorProps) {
   const percent = Math.round(confidence * 100);
   const color =
-    percent >= 80 ? "#22C55E" : percent >= 60 ? "#EAB308" : "#EF4444";
-  const stars = percent >= 80 ? 5 : percent >= 60 ? 4 : 3;
+    percent >= 80
+      ? "#22C55E"
+      : percent >= 60
+        ? "#EAB308"
+        : percent >= 40
+          ? "#F97316"
+          : "#EF4444";
+  const stars =
+    percent >= 80 ? 5 : percent >= 60 ? 4 : percent >= 40 ? 3 : 2;
 
   return (
     <View className="items-end">

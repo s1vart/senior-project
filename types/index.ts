@@ -60,4 +60,46 @@ export interface PlantSearchResult {
   scientificName: string;
   confidence: number;
   imageUrl: string;
+  wikiUrl?: string;
+}
+
+// Plant.id v3 API response types
+export interface PlantIdSuggestion {
+  id: string;
+  name: string;
+  probability: number;
+  details: {
+    common_names?: string[];
+    taxonomy?: {
+      genus: string;
+      family: string;
+    };
+    url?: string;
+    image?: {
+      value: string;
+    };
+  };
+  similar_images?: {
+    id: string;
+    url: string;
+    similarity: number;
+  }[];
+}
+
+export interface PlantIdResponse {
+  access_token: string;
+  model_version: string;
+  input: {
+    images: string[];
+  };
+  result: {
+    is_plant: {
+      probability: number;
+      binary: boolean;
+    };
+    classification: {
+      suggestions: PlantIdSuggestion[];
+    };
+  };
+  status: string;
 }
