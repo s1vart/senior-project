@@ -1,5 +1,12 @@
-import { useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity } from "react-native";
+import { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -7,28 +14,97 @@ import { PlantPhoto } from "../../../../components/PlantPhoto";
 import { TextField } from "../../../../components/ui/TextField";
 import { Toggle } from "../../../../components/ui/Toggle";
 import { Card } from "../../../../components/ui/Card";
-import { mockPlants } from "../../../../data/mockPlants";
+import { Button } from "../../../../components/ui/Button";
+import { fetchPlantById, updatePlant, deletePlant } from "../../../../lib/plants";
+import type { Plant } from "../../../../types";
 
 export default function EditPlantScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const plant = mockPlants.find((p) => p.id === id);
 
-  const [nickname, setNickname] = useState(plant?.nickname ?? "");
-  const [plantType, setPlantType] = useState(plant?.commonName ?? "");
-  const [lastWatered, setLastWatered] = useState(plant?.lastWatered ?? "");
-  const [directSunlight, setDirectSunlight] = useState(
-    plant?.directSunlight ?? false
-  );
-  const [sunlightHours, setSunlightHours] = useState(
-    plant?.sunlightHours?.toString() ?? ""
-  );
-  const [distanceFromWindow, setDistanceFromWindow] = useState(
-    plant?.distanceFromWindow?.toString() ?? ""
-  );
-  const [windowOrientation, setWindowOrientation] = useState(
-    plant?.windowOrientation ?? ""
-  );
+  const [plant, setPlant] = useState<Plant | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  const [nickname, setNickname] = useState("");
+  const [plantType, setPlantType] = useState("");
+  const [lastWatered, setLastWatered] = useState("");
+  const [directSunlight, setDirectSunlight] = useState(false);
+  const [sunlightHours, setSunlightHours] = useState("");
+  const [distanceFromWindow, setDistanceFromWindow] = useState("");
+  const [windowOrientation, setWindowOrientation] = useState("");
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await fetchPlantById(id);
+        if (data) {
+          setPlant(data);
+          setNickname(data.nickname);
+          setPlantType(data.commonName);
+          setLastWatered(data.lastWatered ?? "");
+          setDirectSunlight(data.directSunlight ?? false);
+          setSunlightHours(data.sunlightHours?.toString() ?? "");
+          setDistanceFromWindow(data.distanceFromWindow?.toString() ?? "");
+          setWindowOrientation(data.windowOrientation ?? "");
+        }
+      } catch {
+        setPlant(null);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [id]);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await updatePlant(id, {
+        nickname,
+        commonName: plantType,
+        lastWatered: lastWatered || undefined,
+        directSunlight,
+        sunlightHours: parseFloat(sunlightHours) || undefined,
+        distanceFromWindow: parseFloat(distanceFromWindow) || undefined,
+        windowOrientation: windowOrientation || undefined,
+      });
+      router.back();
+    } catch {
+      Alert.alert("Error", "Failed to save changes.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = () => {
+    Alert.alert(
+      "Delete Plant",
+      `Are you sure you want to remove ${plant?.nickname ?? "this plant"} from your catalog?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deletePlant(id);
+              router.replace("/(tabs)/catalog");
+            } catch {
+              Alert.alert("Error", "Failed to delete plant.");
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  if (loading) {
+    return (
+      <SafeAreaView className="flex-1 bg-dark-bg items-center justify-center">
+        <ActivityIndicator size="large" color="#6B8F71" />
+      </SafeAreaView>
+    );
+  }
 
   if (!plant) {
     return (
@@ -47,13 +123,16 @@ export default function EditPlantScreen() {
         <Text className="text-white text-lg font-semibold">
           Edit Plant Details
         </Text>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Text className="text-sage-accent font-semibold">Save</Text>
+        <TouchableOpacity onPress={handleSave} disabled={saving}>
+          <Text className="text-sage-accent font-semibold">
+            {saving ? "Saving..." : "Save"}
+          </Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40 }}
+        keyboardShouldPersistTaps="handled"
       >
         <View className="items-center mb-6">
           <PlantPhoto uri={plant.photoUrl} size={100} />
@@ -126,6 +205,14 @@ export default function EditPlantScreen() {
             icon={<Ionicons name="compass" size={18} color="#9CA3AF" />}
           />
         </Card>
+
+        <View className="mt-6">
+          <Button
+            title="Delete Plant"
+            onPress={handleDelete}
+            variant="danger"
+          />
+        </View>
       </ScrollView>
     </SafeAreaView>
   );

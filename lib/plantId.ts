@@ -2,7 +2,7 @@ import * as ImageManipulator from "expo-image-manipulator";
 import { PlantIdResponse, PlantSearchResult } from "../types";
 
 const API_URL = "https://plant.id/api/v3/identification";
-const API_KEY = process.env.EXPO_PUBLIC_PLANT_ID_API_KEY;
+const API_KEY = process.env.EXPO_PUBLIC_PLANT_ID_KEY;
 const MAX_DIMENSION = 1024;
 
 export type PlantIdErrorCode = "NOT_PLANT" | "API_ERROR" | "RATE_LIMIT" | "NETWORK";

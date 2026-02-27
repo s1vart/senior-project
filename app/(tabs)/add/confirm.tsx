@@ -8,9 +8,12 @@ import { ConfidenceIndicator } from "../../../components/ConfidenceIndicator";
 import { Card } from "../../../components/ui/Card";
 import { TextField } from "../../../components/ui/TextField";
 import { Button } from "../../../components/ui/Button";
+import { useAuth } from "../../../hooks/useAuth";
+import { createPlant, uploadPlantPhoto } from "../../../lib/plants";
 
 export default function ConfirmPlantScreen() {
   const router = useRouter();
+  const { user } = useAuth();
   const params = useLocalSearchParams<{
     resultId: string;
     commonName: string;
@@ -26,15 +29,32 @@ export default function ConfirmPlantScreen() {
   const confidence = parseFloat(params.confidence) || 0;
   const hasUserPhoto = params.userPhotoUri && params.userPhotoUri.length > 0;
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!nickname.trim()) {
       Alert.alert("Nickname Required", "Please give your plant a nickname.");
       return;
     }
+    if (!user) {
+      Alert.alert("Error", "You must be logged in to save a plant.");
+      return;
+    }
 
     setSaving(true);
-    setTimeout(() => {
-      setSaving(false);
+    try {
+      let photoUrl = params.imageUrl;
+      if (hasUserPhoto) {
+        photoUrl = await uploadPlantPhoto(user.id, params.userPhotoUri);
+      }
+
+      await createPlant({
+        userId: user.id,
+        nickname: nickname.trim(),
+        commonName: params.commonName,
+        scientificName: params.scientificName,
+        confidence,
+        photoUrl,
+      });
+
       Alert.alert("Plant Added!", `${nickname} has been added to your catalog.`, [
         {
           text: "View My Plants",
@@ -45,7 +65,11 @@ export default function ConfirmPlantScreen() {
           onPress: () => router.replace("/(tabs)/add"),
         },
       ]);
-    }, 800);
+    } catch (e: any) {
+      Alert.alert("Error", e.message || "Failed to save your plant. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (

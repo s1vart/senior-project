@@ -1,18 +1,48 @@
-import { View, Text, ScrollView, TouchableOpacity } from "react-native";
+import { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { PlantPhoto } from "../../../components/PlantPhoto";
 import { Card } from "../../../components/ui/Card";
 import { Badge } from "../../../components/ui/Badge";
-import { mockPlants } from "../../../data/mockPlants";
 import { mockReminders } from "../../../data/mockReminders";
+import { fetchPlantById } from "../../../lib/plants";
+import type { Plant } from "../../../types";
 
 export default function PlantDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const plant = mockPlants.find((p) => p.id === id);
+  const [plant, setPlant] = useState<Plant | null>(null);
+  const [loading, setLoading] = useState(true);
   const plantReminders = mockReminders.filter((r) => r.plantId === id);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await fetchPlantById(id);
+        setPlant(data);
+      } catch {
+        setPlant(null);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <SafeAreaView className="flex-1 bg-dark-bg items-center justify-center">
+        <ActivityIndicator size="large" color="#6B8F71" />
+      </SafeAreaView>
+    );
+  }
 
   if (!plant) {
     return (
