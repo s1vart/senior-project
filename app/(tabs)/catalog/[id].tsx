@@ -12,22 +12,26 @@ import { Ionicons } from "@expo/vector-icons";
 import { PlantPhoto } from "../../../components/PlantPhoto";
 import { Card } from "../../../components/ui/Card";
 import { Badge } from "../../../components/ui/Badge";
-import { mockReminders } from "../../../data/mockReminders";
 import { fetchPlantById } from "../../../lib/plants";
-import type { Plant } from "../../../types";
+import { fetchRemindersForPlant } from "../../../lib/reminders";
+import type { Plant, Reminder } from "../../../types";
 
 export default function PlantDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const [plant, setPlant] = useState<Plant | null>(null);
+  const [plantReminders, setPlantReminders] = useState<Reminder[]>([]);
   const [loading, setLoading] = useState(true);
-  const plantReminders = mockReminders.filter((r) => r.plantId === id);
 
   useEffect(() => {
     (async () => {
       try {
-        const data = await fetchPlantById(id);
+        const [data, reminders] = await Promise.all([
+          fetchPlantById(id),
+          fetchRemindersForPlant(id),
+        ]);
         setPlant(data);
+        setPlantReminders(reminders);
       } catch {
         setPlant(null);
       } finally {
@@ -128,6 +132,11 @@ export default function PlantDetailScreen() {
             icon="compass"
             label="Window Orientation"
             value={plant.windowOrientation ?? "--"}
+          />
+          <DetailRow
+            icon="water"
+            label="Watering Advice"
+            value={plant.bestWatering ?? "--"}
             last
           />
         </Card>

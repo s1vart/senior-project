@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, Alert } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, Alert, Switch } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -10,6 +10,11 @@ import { TextField } from "../../../components/ui/TextField";
 import { Button } from "../../../components/ui/Button";
 import { useAuth } from "../../../hooks/useAuth";
 import { createPlant, uploadPlantPhoto } from "../../../lib/plants";
+import { createReminder, suggestWateringFrequency } from "../../../lib/reminders";
+import {
+  requestNotificationPermissions,
+  scheduleReminderNotification,
+} from "../../../lib/notifications";
 
 export default function ConfirmPlantScreen() {
   const router = useRouter();
@@ -21,13 +26,21 @@ export default function ConfirmPlantScreen() {
     confidence: string;
     imageUrl: string;
     userPhotoUri: string;
+    bestWatering: string;
+    wateringMin: string;
+    wateringMax: string;
   }>();
 
   const [nickname, setNickname] = useState("");
   const [saving, setSaving] = useState(false);
+  const [enableReminder, setEnableReminder] = useState(true);
 
   const confidence = parseFloat(params.confidence) || 0;
   const hasUserPhoto = params.userPhotoUri && params.userPhotoUri.length > 0;
+
+  const wateringMin = params.wateringMin ? parseFloat(params.wateringMin) : undefined;
+  const wateringMax = params.wateringMax ? parseFloat(params.wateringMax) : undefined;
+  const suggestedDays = suggestWateringFrequency(wateringMin, wateringMax);
 
   const handleSave = async () => {
     if (!nickname.trim()) {
@@ -46,14 +59,35 @@ export default function ConfirmPlantScreen() {
         photoUrl = await uploadPlantPhoto(user.id, params.userPhotoUri);
       }
 
-      await createPlant({
+      const savedPlant = await createPlant({
         userId: user.id,
         nickname: nickname.trim(),
         commonName: params.commonName,
         scientificName: params.scientificName,
         confidence,
         photoUrl,
+        bestWatering: params.bestWatering || undefined,
+        wateringMin,
+        wateringMax,
       });
+
+      if (enableReminder) {
+        const granted = await requestNotificationPermissions();
+        const now = new Date();
+        const nextDue = new Date(now.getTime() + suggestedDays * 24 * 60 * 60 * 1000);
+        const reminder = await createReminder({
+          plantId: savedPlant.id,
+          userId: user.id,
+          careType: "water",
+          frequencyDays: suggestedDays,
+          timeOfDay: "09:00",
+          nextDue: nextDue.toISOString(),
+          isActive: true,
+        });
+        if (granted) {
+          await scheduleReminderNotification(reminder, nickname.trim());
+        }
+      }
 
       Alert.alert("Plant Added!", `${nickname} has been added to your catalog.`, [
         {
@@ -145,19 +179,40 @@ export default function ConfirmPlantScreen() {
           icon={<Ionicons name="pencil" size={18} color="#9CA3AF" />}
         />
 
-        {/* Info banner */}
-        <View className="flex-row items-start bg-sage-accent/10 rounded-xl p-4 mb-8 border border-sage-accent/20">
-          <Ionicons
-            name="information-circle"
-            size={20}
-            color="#6B8F71"
-            style={{ marginTop: 1 }}
-          />
-          <Text className="text-sage-light text-sm ml-2 flex-1 leading-5">
-            After adding to your catalog, you can fill in care details and set up
-            reminders.
-          </Text>
-        </View>
+        {/* Watering reminder opt-in */}
+        <Text className="text-gray-text text-xs font-semibold uppercase tracking-wider mb-3 ml-1">
+          Watering Reminder
+        </Text>
+        <Card className="mb-8">
+          <View className="flex-row items-center">
+            <View
+              className="w-10 h-10 rounded-full items-center justify-center mr-3"
+              style={{ backgroundColor: "#3B82F620" }}
+            >
+              <Ionicons name="water" size={20} color="#3B82F6" />
+            </View>
+            <View className="flex-1">
+              <Text className="text-white font-semibold">
+                Water every {suggestedDays} days
+              </Text>
+              {params.bestWatering ? (
+                <Text className="text-gray-text text-sm mt-0.5" numberOfLines={2}>
+                  {params.bestWatering}
+                </Text>
+              ) : (
+                <Text className="text-gray-text text-sm mt-0.5">
+                  Suggested based on this species
+                </Text>
+              )}
+            </View>
+            <Switch
+              value={enableReminder}
+              onValueChange={setEnableReminder}
+              trackColor={{ false: "#3A3A3C", true: "#6B8F71" }}
+              thumbColor="white"
+            />
+          </View>
+        </Card>
 
         {/* Action buttons */}
         <Button

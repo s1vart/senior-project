@@ -59,6 +59,7 @@ export async function identifyPlant(
         images: [`data:image/jpeg;base64,${base64}`],
         similar_images: true,
         classification_level: "species",
+        details: ["common_names", "url", "watering", "best_watering"],
       }),
     });
   } catch {
@@ -98,5 +99,8 @@ export async function identifyPlant(
     confidence: s.probability,
     imageUrl: s.similar_images?.[0]?.url ?? "",
     wikiUrl: s.details?.url,
+    bestWatering: s.details?.best_watering,
+    wateringMin: s.details?.watering?.min,
+    wateringMax: s.details?.watering?.max,
   }));
 }

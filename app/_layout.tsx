@@ -9,8 +9,10 @@ import {
 } from "react-native-safe-area-context";
 import { AuthProvider } from "../hooks/AuthProvider";
 import { useAuth } from "../hooks/useAuth";
+import { initNotifications } from "../lib/notifications";
 
 SplashScreen.preventAutoHideAsync();
+initNotifications();
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const { isLoggedIn, loading } = useAuth();

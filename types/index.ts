@@ -23,6 +23,9 @@ export interface Plant {
   distanceFromWindow?: number;
   windowOrientation?: string;
   completionPercent?: number;
+  bestWatering?: string;
+  wateringMin?: number;
+  wateringMax?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -61,6 +64,9 @@ export interface PlantSearchResult {
   confidence: number;
   imageUrl: string;
   wikiUrl?: string;
+  bestWatering?: string;
+  wateringMin?: number;
+  wateringMax?: number;
 }
 
 // Plant.id v3 API response types
@@ -78,6 +84,11 @@ export interface PlantIdSuggestion {
     image?: {
       value: string;
     };
+    watering?: {
+      min: number;
+      max: number;
+    };
+    best_watering?: string;
   };
   similar_images?: {
     id: string;

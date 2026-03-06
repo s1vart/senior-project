@@ -19,6 +19,9 @@ interface PlantRow {
   distance_from_window: number | null;
   window_orientation: string | null;
   completion_percent: number | null;
+  best_watering: string | null;
+  watering_min: number | null;
+  watering_max: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -41,6 +44,9 @@ function toPlant(row: PlantRow): Plant {
     distanceFromWindow: row.distance_from_window ?? undefined,
     windowOrientation: row.window_orientation ?? undefined,
     completionPercent: row.completion_percent ?? undefined,
+    bestWatering: row.best_watering ?? undefined,
+    wateringMin: row.watering_min ?? undefined,
+    wateringMax: row.watering_max ?? undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -70,6 +76,12 @@ function toRow(plant: Partial<Plant>): Record<string, unknown> {
     row.window_orientation = plant.windowOrientation;
   if (plant.completionPercent !== undefined)
     row.completion_percent = plant.completionPercent;
+  if (plant.bestWatering !== undefined)
+    row.best_watering = plant.bestWatering;
+  if (plant.wateringMin !== undefined)
+    row.watering_min = plant.wateringMin;
+  if (plant.wateringMax !== undefined)
+    row.watering_max = plant.wateringMax;
   return row;
 }
 

@@ -249,6 +249,9 @@ export default function IdentifyScreen() {
                       confidence: item.confidence.toString(),
                       imageUrl: item.imageUrl,
                       userPhotoUri: selectedImage ?? "",
+                      bestWatering: item.bestWatering ?? "",
+                      wateringMin: item.wateringMin?.toString() ?? "",
+                      wateringMax: item.wateringMax?.toString() ?? "",
                     },
                   });
                 }}
