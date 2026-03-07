@@ -33,6 +33,7 @@ export default function EditPlantScreen() {
   const [sunlightHours, setSunlightHours] = useState("");
   const [distanceFromWindow, setDistanceFromWindow] = useState("");
   const [windowOrientation, setWindowOrientation] = useState("");
+  const [notes, setNotes] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -47,6 +48,7 @@ export default function EditPlantScreen() {
           setSunlightHours(data.sunlightHours?.toString() ?? "");
           setDistanceFromWindow(data.distanceFromWindow?.toString() ?? "");
           setWindowOrientation(data.windowOrientation ?? "");
+          setNotes(data.notes ?? "");
         }
       } catch {
         setPlant(null);
@@ -67,6 +69,7 @@ export default function EditPlantScreen() {
         sunlightHours: parseFloat(sunlightHours) || undefined,
         distanceFromWindow: parseFloat(distanceFromWindow) || undefined,
         windowOrientation: windowOrientation || undefined,
+        notes: notes.trim() || undefined,
       });
       router.back();
     } catch {
@@ -205,6 +208,15 @@ export default function EditPlantScreen() {
             icon={<Ionicons name="compass" size={18} color="#9CA3AF" />}
           />
         </Card>
+
+        <TextField
+          label="Notes"
+          value={notes}
+          onChangeText={setNotes}
+          placeholder="Add notes about your plant..."
+          multiline
+          icon={<Ionicons name="document-text" size={18} color="#9CA3AF" />}
+        />
 
         <View className="mt-6">
           <Button
