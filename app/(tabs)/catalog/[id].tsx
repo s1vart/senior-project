@@ -1,19 +1,26 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeScreen } from "../../../components/SafeScreen";
 import { Ionicons } from "@expo/vector-icons";
 import { PlantPhoto } from "../../../components/PlantPhoto";
 import { Card } from "../../../components/ui/Card";
 import { Badge } from "../../../components/ui/Badge";
+import { ReminderCard } from "../../../components/ReminderCard";
 import { fetchPlantById } from "../../../lib/plants";
-import { fetchRemindersForPlant } from "../../../lib/reminders";
+import {
+  fetchRemindersForPlant,
+  completeReminder,
+  snoozeReminder,
+  skipReminder,
+} from "../../../lib/reminders";
 import type { Plant, Reminder } from "../../../types";
 
 export default function PlantDetailScreen() {
@@ -22,6 +29,12 @@ export default function PlantDetailScreen() {
   const [plant, setPlant] = useState<Plant | null>(null);
   const [plantReminders, setPlantReminders] = useState<Reminder[]>([]);
   const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  const refreshReminders = useCallback(async () => {
+    const reminders = await fetchRemindersForPlant(id);
+    setPlantReminders(reminders);
+  }, [id]);
 
   useEffect(() => {
     (async () => {
@@ -40,24 +53,59 @@ export default function PlantDetailScreen() {
     })();
   }, [id]);
 
+  const handleAction = useCallback(
+    async (
+      reminder: Reminder,
+      action: "done" | "snooze" | "skip"
+    ) => {
+      setActionLoading(reminder.id);
+      try {
+        if (action === "done") await completeReminder(reminder);
+        else if (action === "snooze") await snoozeReminder(reminder);
+        else await skipReminder(reminder);
+        await refreshReminders();
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "Unknown error";
+        Alert.alert("Error", msg);
+      } finally {
+        setActionLoading(null);
+      }
+    },
+    [refreshReminders]
+  );
+
+  const formatDue = (nextDue: string): string => {
+    const due = new Date(nextDue);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    due.setHours(0, 0, 0, 0);
+    const diff = Math.round(
+      (due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+    );
+    if (diff < 0) return `Overdue by ${Math.abs(diff)} day${Math.abs(diff) === 1 ? "" : "s"}`;
+    if (diff === 0) return "Due today";
+    if (diff === 1) return "Due tomorrow";
+    return `Due in ${diff} days`;
+  };
+
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 bg-dark-bg items-center justify-center">
+      <SafeScreen style={{ alignItems: "center", justifyContent: "center" }}>
         <ActivityIndicator size="large" color="#6B8F71" />
-      </SafeAreaView>
+      </SafeScreen>
     );
   }
 
   if (!plant) {
     return (
-      <SafeAreaView className="flex-1 bg-dark-bg items-center justify-center">
+      <SafeScreen style={{ alignItems: "center", justifyContent: "center" }}>
         <Text className="text-white text-lg">Plant not found</Text>
-      </SafeAreaView>
+      </SafeScreen>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-dark-bg" edges={["top"]}>
+    <SafeScreen edges={["top"]}>
       <View className="flex-row items-center justify-between px-6 pt-4 pb-2">
         <TouchableOpacity
           onPress={() => router.back()}
@@ -146,42 +194,20 @@ export default function PlantDetailScreen() {
             <Text className="text-gray-text text-xs font-semibold uppercase tracking-wider mb-3 ml-1">
               Active Reminders
             </Text>
-            <Card className="mb-6">
-              {plantReminders.map((reminder, index) => (
-                <View
-                  key={reminder.id}
-                  className={`flex-row items-center py-3 ${
-                    index < plantReminders.length - 1
-                      ? "border-b border-dark-border"
-                      : ""
-                  }`}
-                >
-                  <View
-                    className="w-8 h-8 rounded-full items-center justify-center mr-3"
-                    style={{
-                      backgroundColor:
-                        reminder.careType === "water"
-                          ? "#3B82F620"
-                          : "#6B8F7120",
-                    }}
-                  >
-                    <Ionicons
-                      name={reminder.careType === "water" ? "water" : "leaf"}
-                      size={16}
-                      color={
-                        reminder.careType === "water" ? "#3B82F6" : "#6B8F71"
-                      }
-                    />
-                  </View>
-                  <Text className="text-white flex-1 capitalize font-medium">
-                    {reminder.careType}
-                  </Text>
-                  <Text className="text-gray-text text-sm">
-                    Every {reminder.frequencyDays} days
-                  </Text>
-                </View>
-              ))}
-            </Card>
+            {plantReminders.map((reminder) => (
+              <ReminderCard
+                key={reminder.id}
+                title={reminder.careType.charAt(0).toUpperCase() + reminder.careType.slice(1)}
+                description={`Every ${reminder.frequencyDays} days`}
+                icon={reminder.careType === "water" ? "water" : "leaf"}
+                iconColor={reminder.careType === "water" ? "#3B82F6" : "#6B8F71"}
+                dueLabel={formatDue(reminder.nextDue)}
+                loading={actionLoading === reminder.id}
+                onDone={() => handleAction(reminder, "done")}
+                onSnooze={() => handleAction(reminder, "snooze")}
+                onSkip={() => handleAction(reminder, "skip")}
+              />
+            ))}
           </>
         )}
 
@@ -198,7 +224,7 @@ export default function PlantDetailScreen() {
           </>
         )}
       </ScrollView>
-    </SafeAreaView>
+    </SafeScreen>
   );
 }
 

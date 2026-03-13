@@ -1,7 +1,7 @@
 import * as ImageManipulator from "expo-image-manipulator";
 import { PlantIdResponse, PlantSearchResult } from "../types";
 
-const API_URL = "https://plant.id/api/v3/identification";
+const API_URL = "https://plant.id/api/v3/identification?details=common_names,url,watering,best_watering";
 const API_KEY = process.env.EXPO_PUBLIC_PLANT_ID_KEY;
 const MAX_DIMENSION = 1024;
 
@@ -42,10 +42,20 @@ export async function identifyPlant(
   height: number
 ): Promise<PlantSearchResult[]> {
   if (!API_KEY) {
+    console.error("[PlantId] API key is missing!");
     throw new PlantIdError("Plant ID API key is not configured.", "API_ERROR");
   }
 
-  const base64 = await prepareImage(uri, width, height);
+  console.log("[PlantId] Starting identification...");
+
+  let base64: string;
+  try {
+    base64 = await prepareImage(uri, width, height);
+    console.log("[PlantId] Image prepared, base64 length:", base64.length);
+  } catch (err) {
+    console.error("[PlantId] Image preparation failed:", err);
+    throw new PlantIdError("Failed to prepare image.", "API_ERROR");
+  }
 
   let response: Response;
   try {
@@ -59,10 +69,10 @@ export async function identifyPlant(
         images: [`data:image/jpeg;base64,${base64}`],
         similar_images: true,
         classification_level: "species",
-        details: ["common_names", "url", "watering", "best_watering"],
       }),
     });
-  } catch {
+  } catch (err) {
+    console.error("[PlantId] Network error:", err);
     throw new PlantIdError(
       "Could not connect to identification service. Check your internet connection.",
       "NETWORK"
@@ -70,6 +80,7 @@ export async function identifyPlant(
   }
 
   if (response.status === 429) {
+    console.error("[PlantId] Rate limited (429)");
     throw new PlantIdError(
       "Identification rate limit reached. Please try again in a few minutes.",
       "RATE_LIMIT"
@@ -77,6 +88,8 @@ export async function identifyPlant(
   }
 
   if (!response.ok) {
+    const body = await response.text();
+    console.error(`[PlantId] API error ${response.status}:`, body);
     throw new PlantIdError(
       `Identification service error (${response.status}).`,
       "API_ERROR"
@@ -84,6 +97,8 @@ export async function identifyPlant(
   }
 
   const data: PlantIdResponse = await response.json();
+  console.log("[PlantId] Response keys:", JSON.stringify(Object.keys(data)));
+  console.log("[PlantId] First suggestion:", JSON.stringify(data.result?.classification?.suggestions?.[0], null, 2));
 
   if (!data.result.is_plant.binary) {
     throw new PlantIdError(

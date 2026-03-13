@@ -8,7 +8,7 @@ import {
   Alert,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeScreen } from "../../../../components/SafeScreen";
 import { Ionicons } from "@expo/vector-icons";
 import { PlantPhoto } from "../../../../components/PlantPhoto";
 import { TextField } from "../../../../components/ui/TextField";
@@ -103,22 +103,22 @@ export default function EditPlantScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 bg-dark-bg items-center justify-center">
+      <SafeScreen style={{ alignItems: "center", justifyContent: "center" }}>
         <ActivityIndicator size="large" color="#6B8F71" />
-      </SafeAreaView>
+      </SafeScreen>
     );
   }
 
   if (!plant) {
     return (
-      <SafeAreaView className="flex-1 bg-dark-bg items-center justify-center">
+      <SafeScreen style={{ alignItems: "center", justifyContent: "center" }}>
         <Text className="text-white text-lg">Plant not found</Text>
-      </SafeAreaView>
+      </SafeScreen>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-dark-bg" edges={["top"]}>
+    <SafeScreen edges={["top"]}>
       <View className="flex-row items-center justify-between px-5 pt-2 pb-4">
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="chevron-back" size={28} color="white" />
@@ -226,6 +226,6 @@ export default function EditPlantScreen() {
           />
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </SafeScreen>
   );
 }

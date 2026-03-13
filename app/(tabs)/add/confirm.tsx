@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, Alert, Switch } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeScreen } from "../../../components/SafeScreen";
 import { Ionicons } from "@expo/vector-icons";
 import { PlantPhoto } from "../../../components/PlantPhoto";
 import { ConfidenceIndicator } from "../../../components/ConfidenceIndicator";
@@ -107,7 +107,7 @@ export default function ConfirmPlantScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-dark-bg" edges={["top"]}>
+    <SafeScreen edges={["top"]}>
       <View className="flex-row items-center justify-between px-6 pt-4 pb-2">
         <TouchableOpacity
           onPress={() => router.back()}
@@ -227,6 +227,6 @@ export default function ConfirmPlantScreen() {
           variant="ghost"
         />
       </ScrollView>
-    </SafeAreaView>
+    </SafeScreen>
   );
 }

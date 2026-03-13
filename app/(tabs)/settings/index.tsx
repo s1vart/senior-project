@@ -1,5 +1,5 @@
 import { View, Text, ScrollView, TouchableOpacity } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeScreen } from "../../../components/SafeScreen";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../../hooks/useAuth";
 import { Card } from "../../../components/ui/Card";
@@ -9,7 +9,7 @@ export default function SettingsScreen() {
   const { user, logout } = useAuth();
 
   return (
-    <SafeAreaView className="flex-1 bg-dark-bg" edges={["top"]}>
+    <SafeScreen edges={["top"]}>
       <View className="px-6 pt-4 pb-5">
         <Text className="text-white text-2xl font-bold">Settings</Text>
       </View>
@@ -54,7 +54,7 @@ export default function SettingsScreen() {
 
         <Button title="Log Out" onPress={logout} variant="danger" />
       </ScrollView>
-    </SafeAreaView>
+    </SafeScreen>
   );
 }
 

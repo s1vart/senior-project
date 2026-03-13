@@ -8,7 +8,7 @@ import {
   Alert,
 } from "react-native";
 import { useRouter, useFocusEffect } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeScreen } from "../../../components/SafeScreen";
 import { Ionicons } from "@expo/vector-icons";
 import { PlantCard } from "../../../components/PlantCard";
 import { TabSelector } from "../../../components/ui/TabSelector";
@@ -59,7 +59,7 @@ export default function CatalogScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-dark-bg" edges={["top"]}>
+    <SafeScreen edges={["top"]}>
       <View className="px-6 pt-4 pb-5">
         <View className="flex-row items-center justify-between">
           <View className="flex-1 mr-4">
@@ -127,6 +127,6 @@ export default function CatalogScreen() {
           }}
         />
       )}
-    </SafeAreaView>
+    </SafeScreen>
   );
 }

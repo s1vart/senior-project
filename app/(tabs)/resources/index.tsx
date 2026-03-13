@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { View, Text, FlatList, TouchableOpacity } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeScreen } from "../../../components/SafeScreen";
 import { Ionicons } from "@expo/vector-icons";
 import * as WebBrowser from "expo-web-browser";
 import { Card } from "../../../components/ui/Card";
@@ -13,7 +13,7 @@ export default function ResourcesScreen() {
   const filtered = mockResources.filter((r) => r.state === selectedState);
 
   return (
-    <SafeAreaView className="flex-1 bg-dark-bg" edges={["top"]}>
+    <SafeScreen edges={["top"]}>
       <View className="px-6 pt-4 pb-5">
         <Text className="text-white text-2xl font-bold">Resources</Text>
         <Text className="text-gray-text text-sm mt-1 mb-5">
@@ -86,6 +86,6 @@ export default function ResourcesScreen() {
           </View>
         }
       />
-    </SafeAreaView>
+    </SafeScreen>
   );
 }

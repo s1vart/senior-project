@@ -1,5 +1,5 @@
 import { supabase } from "./supabase";
-import type { Reminder } from "../types";
+import type { Reminder, ReminderLog } from "../types";
 
 // --- Raw DB row type (snake_case) ---
 interface ReminderRow {
@@ -59,12 +59,78 @@ export function suggestWateringFrequency(
 ): number {
   if (wateringMin == null || wateringMax == null) return 7;
 
+  // Plant.id API returns watering on a 1–3 scale:
+  // 1 = low water needs, 2 = medium, 3 = high
   const avg = (wateringMin + wateringMax) / 2;
 
-  if (avg >= 60) return 3; // high moisture — every 3 days
-  if (avg >= 40) return 5; // moderate — every 5 days
-  if (avg >= 20) return 7; // average — weekly
-  return 14; // low / drought-tolerant — every 2 weeks
+  if (avg >= 3) return 3;   // high — every 3 days
+  if (avg >= 2) return 5;   // medium — every 5 days
+  if (avg >= 1) return 10;  // low — every 10 days
+  return 7;                  // fallback — weekly
+}
+
+// --- Reminder log row type (snake_case) ---
+interface ReminderLogRow {
+  id: string;
+  reminder_id: string;
+  action: "completed" | "skipped" | "snoozed";
+  acted_at: string;
+}
+
+function toReminderLog(row: ReminderLogRow): ReminderLog {
+  return {
+    id: row.id,
+    reminderId: row.reminder_id,
+    action: row.action,
+    actedAt: row.acted_at,
+  };
+}
+
+// --- Action helpers ---
+
+/** Returns an ISO date string advanced by `days` from the later of `currentNextDue` or today. */
+function advanceNextDue(currentNextDue: string, days: number): string {
+  const due = new Date(currentNextDue);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const base = due > today ? due : today;
+  base.setDate(base.getDate() + days);
+  return base.toISOString().split("T")[0];
+}
+
+async function logAction(
+  reminderId: string,
+  action: ReminderLog["action"]
+): Promise<ReminderLog> {
+  const { data, error } = await supabase
+    .from("reminder_logs")
+    .insert({ reminder_id: reminderId, action })
+    .select()
+    .single();
+
+  if (error) throw new Error(`Failed to log action: ${error.message}`);
+  return toReminderLog(data as ReminderLogRow);
+}
+
+/** Mark reminder as done — logs "completed" and advances nextDue by frequencyDays. */
+export async function completeReminder(reminder: Reminder): Promise<Reminder> {
+  await logAction(reminder.id, "completed");
+  const nextDue = advanceNextDue(reminder.nextDue, reminder.frequencyDays);
+  return updateReminder(reminder.id, { nextDue });
+}
+
+/** Snooze reminder — logs "snoozed" and advances nextDue by 1 day. */
+export async function snoozeReminder(reminder: Reminder): Promise<Reminder> {
+  await logAction(reminder.id, "snoozed");
+  const nextDue = advanceNextDue(reminder.nextDue, 1);
+  return updateReminder(reminder.id, { nextDue });
+}
+
+/** Skip reminder — logs "skipped" and advances nextDue by frequencyDays. */
+export async function skipReminder(reminder: Reminder): Promise<Reminder> {
+  await logAction(reminder.id, "skipped");
+  const nextDue = advanceNextDue(reminder.nextDue, reminder.frequencyDays);
+  return updateReminder(reminder.id, { nextDue });
 }
 
 // --- CRUD ---

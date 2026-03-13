@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeScreen } from "../../../components/SafeScreen";
 import { Ionicons } from "@expo/vector-icons";
 import { ReminderCard } from "../../../components/ReminderCard";
 import { Toggle } from "../../../components/ui/Toggle";
@@ -13,7 +13,7 @@ export default function ManageCareScreen() {
   const [location, setLocation] = useState("Gainesville, FL");
 
   return (
-    <SafeAreaView className="flex-1 bg-dark-bg" edges={["top"]}>
+    <SafeScreen edges={["top"]}>
       <View className="flex-row items-center justify-between px-5 pt-2 pb-4">
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="chevron-back" size={28} color="white" />
@@ -74,6 +74,6 @@ export default function ManageCareScreen() {
           />
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </SafeScreen>
   );
 }

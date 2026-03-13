@@ -8,7 +8,7 @@ import {
   Image,
   ActivityIndicator,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeScreen } from "../../../components/SafeScreen";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
@@ -57,6 +57,7 @@ export default function IdentifyScreen() {
       const identified = await identifyPlant(uri, width, height);
       setResults(identified);
     } catch (e) {
+      console.error("[AddPlant] Identification error:", e);
       if (e instanceof PlantIdError) {
         setError(e.message);
         setErrorCode(e.code);
@@ -131,7 +132,7 @@ export default function IdentifyScreen() {
   const errInfo = errorCode ? ERROR_MESSAGES[errorCode] ?? ERROR_MESSAGES.API_ERROR : null;
 
   return (
-    <SafeAreaView className="flex-1 bg-dark-bg" edges={["top"]}>
+    <SafeScreen edges={["top"]}>
       <View className="px-6 pt-4 pb-5">
         <Text className="text-white text-2xl font-bold">
           Identify Your Plant
@@ -269,6 +270,6 @@ export default function IdentifyScreen() {
           </Text>
         </View>
       )}
-    </SafeAreaView>
+    </SafeScreen>
   );
 }

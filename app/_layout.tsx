@@ -3,10 +3,7 @@ import { useEffect } from "react";
 import { Stack, useSegments, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
-import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AuthProvider } from "../hooks/AuthProvider";
 import { useAuth } from "../hooks/useAuth";
 import { initNotifications } from "../lib/notifications";
@@ -35,16 +32,9 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
 }
 
 function RootLayoutNav() {
-  const insets = useSafeAreaInsets();
-
   useEffect(() => {
-    if (insets.top > 0) {
-      SplashScreen.hideAsync();
-    } else {
-      const timeout = setTimeout(() => SplashScreen.hideAsync(), 300);
-      return () => clearTimeout(timeout);
-    }
-  }, [insets.top]);
+    SplashScreen.hideAsync();
+  }, []);
 
   return (
     <AuthProvider>
