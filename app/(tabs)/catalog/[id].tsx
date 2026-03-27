@@ -14,7 +14,7 @@ import { PlantPhoto } from "../../../components/PlantPhoto";
 import { Card } from "../../../components/ui/Card";
 import { Badge } from "../../../components/ui/Badge";
 import { ReminderCard } from "../../../components/ReminderCard";
-import { fetchPlantById } from "../../../lib/plants";
+import { fetchPlantById, deletePlant } from "../../../lib/plants";
 import {
   fetchRemindersForPlant,
   completeReminder,
@@ -52,6 +52,29 @@ export default function PlantDetailScreen() {
       }
     })();
   }, [id]);
+
+  const handleDelete = useCallback(() => {
+    Alert.alert(
+      "Delete Plant",
+      `Are you sure you want to delete "${plant?.nickname ?? "this plant"}"? This cannot be undone.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deletePlant(id);
+              router.back();
+            } catch (err: unknown) {
+              const msg = err instanceof Error ? err.message : "Unknown error";
+              Alert.alert("Error", msg);
+            }
+          },
+        },
+      ]
+    );
+  }, [id, plant?.nickname, router]);
 
   const handleAction = useCallback(
     async (
@@ -223,6 +246,18 @@ export default function PlantDetailScreen() {
             </Card>
           </>
         )}
+
+        <TouchableOpacity
+          onPress={handleDelete}
+          className="mt-8 py-4 rounded-2xl border border-red-500/30 bg-red-500/10 items-center"
+        >
+          <View className="flex-row items-center">
+            <Ionicons name="trash-outline" size={18} color="#EF4444" />
+            <Text className="text-red-500 font-semibold text-base ml-2">
+              Delete Plant
+            </Text>
+          </View>
+        </TouchableOpacity>
       </ScrollView>
     </SafeScreen>
   );
