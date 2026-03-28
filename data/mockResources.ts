@@ -49,4 +49,36 @@ export const mockResources: ExtensionResource[] = [
     description:
       "Gardening, agriculture, and natural resource management resources for Texas residents.",
   },
+  {
+    id: "res7",
+    state: "NY",
+    name: "Cornell Garden-Based Learning",
+    url: "https://gardening.cals.cornell.edu/",
+    description:
+      "Cornell University's central hub for gardening resources, plant care guides, and educational programs.",
+  },
+  {
+    id: "res8",
+    state: "NY",
+    name: "Cornell Master Gardener Program",
+    url: "https://gardening.cals.cornell.edu/cornell-cooperative-extension-master-gardener-volunteer-program/",
+    description:
+      "Volunteer program offering expert gardening advice and community workshops across New York.",
+  },
+  {
+    id: "res9",
+    state: "GA",
+    name: "UGA Cooperative Extension",
+    url: "https://extension.uga.edu/topic-areas/lawn-garden-landscapes.html",
+    description:
+      "University of Georgia extension services for lawn, garden, and landscape care across the state.",
+  },
+  {
+    id: "res10",
+    state: "GA",
+    name: "Georgia Master Gardener Program",
+    url: "https://extension.uga.edu/programs-services/georgia-master-gardener-extension-volunteer-program.html",
+    description:
+      "UGA program connecting plant enthusiasts with research-based horticulture resources and community events.",
+  },
 ];

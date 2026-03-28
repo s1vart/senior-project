@@ -1,16 +1,62 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SafeScreen } from "../../../components/SafeScreen";
 import { Ionicons } from "@expo/vector-icons";
 import { ReminderCard } from "../../../components/ReminderCard";
 import { Toggle } from "../../../components/ui/Toggle";
 import { TextField } from "../../../components/ui/TextField";
+import { useAuth } from "../../../hooks/useAuth";
+import { fetchRemindersForUser } from "../../../lib/reminders";
+import type { Reminder } from "../../../types";
+
+const STORAGE_KEYS = {
+  seasonalUpdates: "care_seasonal_updates",
+  location: "care_location",
+};
 
 export default function ManageCareScreen() {
   const router = useRouter();
+  const { user } = useAuth();
   const [seasonalUpdates, setSeasonalUpdates] = useState(true);
-  const [location, setLocation] = useState("Gainesville, FL");
+  const [location, setLocation] = useState("");
+  const [reminders, setReminders] = useState<Reminder[]>([]);
+
+  // Load saved preferences
+  useEffect(() => {
+    (async () => {
+      const [savedSeasonal, savedLocation] = await Promise.all([
+        AsyncStorage.getItem(STORAGE_KEYS.seasonalUpdates),
+        AsyncStorage.getItem(STORAGE_KEYS.location),
+      ]);
+      if (savedSeasonal !== null) setSeasonalUpdates(savedSeasonal === "true");
+      if (savedLocation !== null) setLocation(savedLocation);
+    })();
+  }, []);
+
+  // Load user reminders for summary counts
+  useEffect(() => {
+    if (!user) return;
+    fetchRemindersForUser(user.id)
+      .then(setReminders)
+      .catch(() => {});
+  }, [user]);
+
+  const handleSeasonalToggle = useCallback((value: boolean) => {
+    setSeasonalUpdates(value);
+    AsyncStorage.setItem(STORAGE_KEYS.seasonalUpdates, String(value));
+  }, []);
+
+  const handleLocationChange = useCallback((value: string) => {
+    setLocation(value);
+    AsyncStorage.setItem(STORAGE_KEYS.location, value);
+  }, []);
+
+  const waterCount = reminders.filter((r) => r.careType === "water").length;
+  const fertilizerCount = reminders.filter(
+    (r) => r.careType === "fertilize"
+  ).length;
 
   return (
     <SafeScreen edges={["top"]}>
@@ -33,19 +79,20 @@ export default function ManageCareScreen() {
 
         <ReminderCard
           title="Water Reminders"
-          description="Water Reminders are personalized to each plant based on plant type, pot size, and placement in home."
+          description={`${waterCount} active water reminder${waterCount !== 1 ? "s" : ""}. Personalized to each plant based on plant type, pot size, and placement in home.`}
           icon="water"
           iconColor="#3B82F6"
-          onAction={() => {}}
+          actionLabel="View Plants"
+          onAction={() => router.push("/(tabs)/catalog")}
         />
 
         <ReminderCard
           title="Fertilizer Reminders"
-          description="Fertilizer Reminders are based on your plant's appetite for nutrients. Fast growing plants need more grub."
+          description={`${fertilizerCount} active fertilizer reminder${fertilizerCount !== 1 ? "s" : ""}. Based on your plant's appetite for nutrients. Fast growing plants need more grub.`}
           icon="leaf"
           iconColor="#22C55E"
           actionLabel="Select Plants"
-          onAction={() => {}}
+          onAction={() => router.push("/(tabs)/catalog")}
         />
 
         <Text className="text-gray-text text-xs font-semibold uppercase tracking-wider mb-3 mt-6">
@@ -57,7 +104,7 @@ export default function ManageCareScreen() {
             label="Seasonal Updates"
             description="Set your location to see how current sunlight levels affect plant growing potential."
             value={seasonalUpdates}
-            onValueChange={setSeasonalUpdates}
+            onValueChange={handleSeasonalToggle}
           />
         </View>
 
@@ -68,7 +115,7 @@ export default function ManageCareScreen() {
           <TextField
             label="Select City"
             value={location}
-            onChangeText={setLocation}
+            onChangeText={handleLocationChange}
             placeholder="Enter your city"
             icon={<Ionicons name="location" size={18} color="#9CA3AF" />}
           />
