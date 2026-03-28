@@ -21,6 +21,7 @@ import {
   snoozeReminder,
   skipReminder,
 } from "../../../lib/reminders";
+import { formatDue } from "../../../lib/dates";
 import type { Plant, Reminder } from "../../../types";
 
 export default function PlantDetailScreen() {
@@ -96,20 +97,6 @@ export default function PlantDetailScreen() {
     },
     [refreshReminders]
   );
-
-  const formatDue = (nextDue: string): string => {
-    const due = new Date(nextDue);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    due.setHours(0, 0, 0, 0);
-    const diff = Math.round(
-      (due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
-    );
-    if (diff < 0) return `Overdue by ${Math.abs(diff)} day${Math.abs(diff) === 1 ? "" : "s"}`;
-    if (diff === 0) return "Due today";
-    if (diff === 1) return "Due tomorrow";
-    return `Due in ${diff} days`;
-  };
 
   if (loading) {
     return (
@@ -203,13 +190,21 @@ export default function PlantDetailScreen() {
             icon="compass"
             label="Window Orientation"
             value={plant.windowOrientation ?? "--"}
-          />
-          <DetailRow
-            icon="water"
-            label="Watering Advice"
-            value={plant.bestWatering ?? "--"}
             last
           />
+          {plant.bestWatering && (
+            <View className="pt-4 mt-3 border-t border-dark-border">
+              <View className="flex-row items-center mb-2">
+                <Ionicons name="water" size={18} color="#9CA3AF" />
+                <Text className="text-gray-text ml-3 text-sm font-medium">
+                  Watering Advice
+                </Text>
+              </View>
+              <Text className="text-gray-text text-sm leading-5">
+                {plant.bestWatering}
+              </Text>
+            </View>
+          )}
         </Card>
 
         {plantReminders.length > 0 && (

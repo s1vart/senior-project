@@ -89,7 +89,7 @@ function toReminderLog(row: ReminderLogRow): ReminderLog {
 // --- Action helpers ---
 
 /** Returns an ISO date string advanced by `days` from the later of `currentNextDue` or today. */
-function advanceNextDue(currentNextDue: string, days: number): string {
+export function advanceNextDue(currentNextDue: string, days: number): string {
   const due = new Date(currentNextDue);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
