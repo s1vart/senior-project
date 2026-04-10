@@ -12,10 +12,10 @@ interface ReminderCardProps {
   onAction?: () => void;
   /** Due date label shown below description */
   dueLabel?: string;
-  /** Tri-action callbacks — when provided, renders Done/Snooze/Skip row */
-  onDone?: () => void;
+  /** Whether the reminder is currently due (nextDue <= today) */
+  isDue?: boolean;
+  /** Snooze callback — pushes reminder by 1 day */
   onSnooze?: () => void;
-  onSkip?: () => void;
   /** Disables action buttons and shows spinner */
   loading?: boolean;
 }
@@ -28,13 +28,10 @@ export function ReminderCard({
   actionLabel = "Select Plants",
   onAction,
   dueLabel,
-  onDone,
+  isDue = false,
   onSnooze,
-  onSkip,
   loading = false,
 }: ReminderCardProps) {
-  const hasTriActions = onDone || onSnooze || onSkip;
-
   return (
     <View className="bg-dark-card rounded-2xl p-4 mb-3">
       <View className="flex-row items-start">
@@ -53,36 +50,28 @@ export function ReminderCard({
         </View>
       </View>
 
-      {/* Tri-action row (Done / Snooze / Skip) */}
-      {hasTriActions && (
-        <View className="flex-row mt-3 gap-2">
-          {onDone && (
-            <ActionButton
-              label="Done"
-              icon="checkmark-circle"
-              color="#22C55E"
-              onPress={onDone}
-              disabled={loading}
-            />
-          )}
-          {onSnooze && (
-            <ActionButton
-              label="Snooze"
-              icon="time"
-              color="#EAB308"
-              onPress={onSnooze}
-              disabled={loading}
-            />
-          )}
-          {onSkip && (
-            <ActionButton
-              label="Skip"
-              icon="play-skip-forward"
-              color="#9CA3AF"
-              onPress={onSkip}
-              disabled={loading}
-            />
-          )}
+      {onSnooze && (
+        <View className="flex-row mt-3">
+          <TouchableOpacity
+            onPress={onSnooze}
+            disabled={loading || !isDue}
+            activeOpacity={0.7}
+            className="flex-1 flex-row items-center justify-center rounded-xl py-2"
+            style={{
+              backgroundColor: "#EAB30815",
+              borderWidth: 1,
+              borderColor: "#EAB30840",
+              opacity: loading || !isDue ? 0.4 : 1,
+            }}
+          >
+            <Ionicons name="time" size={16} color="#EAB308" />
+            <Text
+              style={{ color: "#EAB308" }}
+              className="font-semibold text-xs ml-1"
+            >
+              Snooze
+            </Text>
+          </TouchableOpacity>
           {loading && (
             <View className="items-center justify-center ml-2">
               <ActivityIndicator size="small" color="#6B8F71" />
@@ -90,9 +79,8 @@ export function ReminderCard({
           )}
         </View>
       )}
-
-      {/* Legacy single-action button */}
-      {!hasTriActions && onAction && (
+      {/* Legacy single-action button (used by manage screen) */}
+      {!onSnooze && onAction && (
         <TouchableOpacity
           onPress={onAction}
           className="mt-3 border border-sage-accent rounded-xl py-2 items-center"
@@ -104,39 +92,5 @@ export function ReminderCard({
         </TouchableOpacity>
       )}
     </View>
-  );
-}
-
-function ActionButton({
-  label,
-  icon,
-  color,
-  onPress,
-  disabled,
-}: {
-  label: string;
-  icon: keyof typeof Ionicons.glyphMap;
-  color: string;
-  onPress: () => void;
-  disabled: boolean;
-}) {
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      disabled={disabled}
-      activeOpacity={0.7}
-      className="flex-1 flex-row items-center justify-center rounded-xl py-2"
-      style={{
-        backgroundColor: `${color}15`,
-        borderWidth: 1,
-        borderColor: `${color}40`,
-        opacity: disabled ? 0.5 : 1,
-      }}
-    >
-      <Ionicons name={icon} size={16} color={color} />
-      <Text style={{ color }} className="font-semibold text-xs ml-1">
-        {label}
-      </Text>
-    </TouchableOpacity>
   );
 }

@@ -178,6 +178,12 @@ export async function updatePlant(
   return toPlant(data as PlantRow);
 }
 
+/** Set a plant's lastWatered to today and persist to Supabase. */
+export async function waterPlant(plantId: string): Promise<Plant> {
+  const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+  return updatePlant(plantId, { lastWatered: today });
+}
+
 export async function deletePlant(plantId: string): Promise<void> {
   const { error } = await supabase
     .from("plants")

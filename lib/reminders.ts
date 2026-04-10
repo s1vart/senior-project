@@ -112,10 +112,13 @@ async function logAction(
   return toReminderLog(data as ReminderLogRow);
 }
 
-/** Mark reminder as done — logs "completed" and advances nextDue by frequencyDays. */
+/** Mark reminder as done — logs "completed" and resets nextDue to today + frequencyDays. */
 export async function completeReminder(reminder: Reminder): Promise<Reminder> {
   await logAction(reminder.id, "completed");
-  const nextDue = advanceNextDue(reminder.nextDue, reminder.frequencyDays);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  today.setDate(today.getDate() + reminder.frequencyDays);
+  const nextDue = today.toISOString().split("T")[0];
   return updateReminder(reminder.id, { nextDue });
 }
 

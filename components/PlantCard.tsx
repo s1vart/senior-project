@@ -6,6 +6,8 @@ import { PlantPhoto } from "./PlantPhoto";
 interface PlantCardProps {
   plant: Plant;
   daysAgo?: number;
+  /** Override the default water-status badge with custom text (e.g. "Due in 5 days") */
+  statusOverride?: { label: string; color: string };
   onPress: () => void;
 }
 
@@ -18,9 +20,14 @@ function getWaterStatus(days: number): {
   return { color: "#EF4444", label: "Overdue" };
 }
 
-export function PlantCard({ plant, daysAgo, onPress }: PlantCardProps) {
+export function PlantCard({
+  plant,
+  daysAgo,
+  statusOverride,
+  onPress,
+}: PlantCardProps) {
   const daysSinceWatered = daysAgo ?? getDaysSinceWatered(plant.lastWatered);
-  const waterStatus = getWaterStatus(daysSinceWatered);
+  const waterStatus = statusOverride ?? getWaterStatus(daysSinceWatered);
 
   return (
     <TouchableOpacity
@@ -55,9 +62,11 @@ export function PlantCard({ plant, daysAgo, onPress }: PlantCardProps) {
             {waterStatus.label}
           </Text>
         </View>
-        <Text className="text-gray-text text-xs ml-3">
-          Watered {daysSinceWatered}d ago
-        </Text>
+        {!statusOverride && (
+          <Text className="text-gray-text text-xs ml-3">
+            Watered {daysSinceWatered}d ago
+          </Text>
+        )}
       </View>
     </TouchableOpacity>
   );

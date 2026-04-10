@@ -1,15 +1,13 @@
-import { useState } from "react";
 import { View, Text, FlatList, TouchableOpacity } from "react-native";
 import { SafeScreen } from "../../../components/SafeScreen";
 import { Ionicons } from "@expo/vector-icons";
 import * as WebBrowser from "expo-web-browser";
 import { Card } from "../../../components/ui/Card";
 import { mockResources } from "../../../data/mockResources";
-
-const US_STATES = ["FL", "CA", "TX", "NY", "GA"];
+import { useRegion, US_STATES } from "../../../hooks/useRegion";
 
 export default function ResourcesScreen() {
-  const [selectedState, setSelectedState] = useState("FL");
+  const { region: selectedState, setRegion: setSelectedState } = useRegion();
   const filtered = mockResources.filter((r) => r.state === selectedState);
 
   return (

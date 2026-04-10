@@ -14,15 +14,34 @@ import { PlantPhoto } from "../../../components/PlantPhoto";
 import { Card } from "../../../components/ui/Card";
 import { Badge } from "../../../components/ui/Badge";
 import { ReminderCard } from "../../../components/ReminderCard";
-import { fetchPlantById, deletePlant } from "../../../lib/plants";
+import { fetchPlantById, deletePlant, waterPlant } from "../../../lib/plants";
 import {
   fetchRemindersForPlant,
   completeReminder,
   snoozeReminder,
-  skipReminder,
 } from "../../../lib/reminders";
-import { formatDue } from "../../../lib/dates";
+import {
+  formatDue,
+  formatLastWateredRelative,
+  formatLastWateredAbsolute,
+} from "../../../lib/dates";
 import type { Plant, Reminder } from "../../../types";
+
+/** Check whether an ISO date string is today. */
+function isToday(dateStr?: string): boolean {
+  if (!dateStr) return false;
+  const today = new Date().toISOString().split("T")[0];
+  return dateStr.startsWith(today);
+}
+
+/** Check whether a reminder is due (nextDue <= today). */
+function reminderIsDue(reminder: Reminder): boolean {
+  const due = new Date(reminder.nextDue);
+  due.setHours(0, 0, 0, 0);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return due <= today;
+}
 
 export default function PlantDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -31,28 +50,29 @@ export default function PlantDetailScreen() {
   const [plantReminders, setPlantReminders] = useState<Reminder[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [wateringLoading, setWateringLoading] = useState(false);
+  const [showAbsoluteDate, setShowAbsoluteDate] = useState(false);
 
-  const refreshReminders = useCallback(async () => {
-    const reminders = await fetchRemindersForPlant(id);
+  const refreshData = useCallback(async () => {
+    const [data, reminders] = await Promise.all([
+      fetchPlantById(id),
+      fetchRemindersForPlant(id),
+    ]);
+    setPlant(data);
     setPlantReminders(reminders);
   }, [id]);
 
   useEffect(() => {
     (async () => {
       try {
-        const [data, reminders] = await Promise.all([
-          fetchPlantById(id),
-          fetchRemindersForPlant(id),
-        ]);
-        setPlant(data);
-        setPlantReminders(reminders);
+        await refreshData();
       } catch {
         setPlant(null);
       } finally {
         setLoading(false);
       }
     })();
-  }, [id]);
+  }, [refreshData]);
 
   const handleDelete = useCallback(() => {
     Alert.alert(
@@ -77,17 +97,37 @@ export default function PlantDetailScreen() {
     );
   }, [id, plant?.nickname, router]);
 
-  const handleAction = useCallback(
-    async (
-      reminder: Reminder,
-      action: "done" | "snooze" | "skip"
-    ) => {
+  /** Mark plant as watered today + advance the water reminder in Supabase. */
+  const handleWaterToday = useCallback(async () => {
+    setWateringLoading(true);
+    try {
+      // 1. Update lastWatered on the plant
+      await waterPlant(id);
+
+      // 2. Advance the active water reminder (if one exists)
+      const waterReminder = plantReminders.find(
+        (r) => r.careType === "water" && r.isActive
+      );
+      if (waterReminder) {
+        await completeReminder(waterReminder);
+      }
+
+      // 3. Refresh everything from Supabase
+      await refreshData();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Unknown error";
+      Alert.alert("Error", msg);
+    } finally {
+      setWateringLoading(false);
+    }
+  }, [id, plantReminders, refreshData]);
+
+  const handleSnooze = useCallback(
+    async (reminder: Reminder) => {
       setActionLoading(reminder.id);
       try {
-        if (action === "done") await completeReminder(reminder);
-        else if (action === "snooze") await snoozeReminder(reminder);
-        else await skipReminder(reminder);
-        await refreshReminders();
+        await snoozeReminder(reminder);
+        await refreshData();
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : "Unknown error";
         Alert.alert("Error", msg);
@@ -95,7 +135,7 @@ export default function PlantDetailScreen() {
         setActionLoading(null);
       }
     },
-    [refreshReminders]
+    [refreshData]
   );
 
   if (loading) {
@@ -113,6 +153,8 @@ export default function PlantDetailScreen() {
       </SafeScreen>
     );
   }
+
+  const wateredToday = isToday(plant.lastWatered);
 
   return (
     <SafeScreen edges={["top"]}>
@@ -135,7 +177,8 @@ export default function PlantDetailScreen() {
       <ScrollView
         contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 48 }}
       >
-        <View className="items-center mt-4 mb-8">
+        {/* ── Plant header ── */}
+        <View className="items-center mt-4 mb-6">
           <PlantPhoto uri={plant.photoUrl} size={120} />
           <Text className="text-white text-2xl font-bold mt-5">
             {plant.nickname}
@@ -155,15 +198,56 @@ export default function PlantDetailScreen() {
           )}
         </View>
 
+        {/* ── Watered Today button ── */}
+        <TouchableOpacity
+          onPress={handleWaterToday}
+          disabled={wateredToday || wateringLoading}
+          activeOpacity={0.7}
+          className="mb-6 py-3.5 rounded-2xl items-center flex-row justify-center"
+          style={{
+            backgroundColor: wateredToday ? "#9CA3AF15" : "#3B82F615",
+            borderWidth: 1,
+            borderColor: wateredToday ? "#9CA3AF30" : "#3B82F640",
+            opacity: wateringLoading ? 0.6 : 1,
+          }}
+        >
+          {wateringLoading ? (
+            <ActivityIndicator size="small" color="#3B82F6" />
+          ) : (
+            <>
+              <Ionicons
+                name={wateredToday ? "checkmark-circle" : "water"}
+                size={20}
+                color={wateredToday ? "#9CA3AF" : "#3B82F6"}
+              />
+              <Text
+                className="font-semibold text-base ml-2"
+                style={{ color: wateredToday ? "#9CA3AF" : "#3B82F6" }}
+              >
+                {wateredToday ? "Watered" : "Watered Today"}
+              </Text>
+            </>
+          )}
+        </TouchableOpacity>
+
+        {/* ── Care Info ── */}
         <Text className="text-gray-text text-xs font-semibold uppercase tracking-wider mb-3 ml-1">
           Care Info
         </Text>
         <Card className="mb-6">
-          <DetailRow
-            icon="water"
-            label="Last Watered"
-            value={plant.lastWatered ?? "Not recorded"}
-          />
+          <TouchableOpacity
+            onPress={() => plant.lastWatered && setShowAbsoluteDate((v) => !v)}
+            activeOpacity={plant.lastWatered ? 0.6 : 1}
+            className="flex-row items-center py-3 border-b border-dark-border"
+          >
+            <Ionicons name="water" size={18} color="#9CA3AF" />
+            <Text className="text-gray-text ml-3 flex-1">Last Watered</Text>
+            <Text className="text-white font-medium">
+              {showAbsoluteDate
+                ? formatLastWateredAbsolute(plant.lastWatered)
+                : formatLastWateredRelative(plant.lastWatered)}
+            </Text>
+          </TouchableOpacity>
           <DetailRow
             icon="beaker"
             label="Water Amount"
@@ -207,6 +291,7 @@ export default function PlantDetailScreen() {
           )}
         </Card>
 
+        {/* ── Active Reminders ── */}
         {plantReminders.length > 0 && (
           <>
             <Text className="text-gray-text text-xs font-semibold uppercase tracking-wider mb-3 ml-1">
@@ -215,20 +300,25 @@ export default function PlantDetailScreen() {
             {plantReminders.map((reminder) => (
               <ReminderCard
                 key={reminder.id}
-                title={reminder.careType.charAt(0).toUpperCase() + reminder.careType.slice(1)}
+                title={
+                  reminder.careType.charAt(0).toUpperCase() +
+                  reminder.careType.slice(1)
+                }
                 description={`Every ${reminder.frequencyDays} days`}
                 icon={reminder.careType === "water" ? "water" : "leaf"}
-                iconColor={reminder.careType === "water" ? "#3B82F6" : "#6B8F71"}
+                iconColor={
+                  reminder.careType === "water" ? "#3B82F6" : "#6B8F71"
+                }
                 dueLabel={formatDue(reminder.nextDue)}
+                isDue={reminderIsDue(reminder)}
                 loading={actionLoading === reminder.id}
-                onDone={() => handleAction(reminder, "done")}
-                onSnooze={() => handleAction(reminder, "snooze")}
-                onSkip={() => handleAction(reminder, "skip")}
+                onSnooze={() => handleSnooze(reminder)}
               />
             ))}
           </>
         )}
 
+        {/* ── Notes ── */}
         {plant.notes && (
           <>
             <Text className="text-gray-text text-xs font-semibold uppercase tracking-wider mb-3 ml-1">
