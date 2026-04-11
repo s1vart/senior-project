@@ -46,12 +46,9 @@ export async function identifyPlant(
     throw new PlantIdError("Plant ID API key is not configured.", "API_ERROR");
   }
 
-  console.log("[PlantId] Starting identification...");
-
   let base64: string;
   try {
     base64 = await prepareImage(uri, width, height);
-    console.log("[PlantId] Image prepared, base64 length:", base64.length);
   } catch (err) {
     console.error("[PlantId] Image preparation failed:", err);
     throw new PlantIdError("Failed to prepare image.", "API_ERROR");
@@ -97,8 +94,6 @@ export async function identifyPlant(
   }
 
   const data: PlantIdResponse = await response.json();
-  console.log("[PlantId] Response keys:", JSON.stringify(Object.keys(data)));
-  console.log("[PlantId] First suggestion:", JSON.stringify(data.result?.classification?.suggestions?.[0], null, 2));
 
   if (!data.result.is_plant.binary) {
     throw new PlantIdError(
