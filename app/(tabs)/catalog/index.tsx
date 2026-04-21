@@ -3,7 +3,6 @@ import {
   View,
   Text,
   FlatList,
-  TouchableOpacity,
   ActivityIndicator,
   Alert,
 } from "react-native";
@@ -123,23 +122,14 @@ export default function CatalogScreen() {
   return (
     <SafeScreen edges={["top"]}>
       <View className="px-6 pt-4 pb-5">
-        <View className="flex-row items-center justify-between">
-          <View className="flex-1 mr-4">
-            <Text className="text-white text-2xl font-bold">
-              Smart Care Schedule
-            </Text>
-            <Text className="text-gray-text text-sm mt-1">
-              {plants.length} plant{plants.length !== 1 ? "s" : ""} in your
-              garden
-            </Text>
-          </View>
-          <TouchableOpacity
-            onPress={() => router.push("/(tabs)/catalog/manage")}
-            className="w-10 h-10 rounded-full bg-dark-card border border-dark-border items-center justify-center"
-            activeOpacity={0.7}
-          >
-            <Ionicons name="notifications-outline" size={18} color="#9CA3AF" />
-          </TouchableOpacity>
+        <View>
+          <Text className="text-white text-2xl font-bold">
+            Smart Care Schedule
+          </Text>
+          <Text className="text-gray-text text-sm mt-1">
+            {plants.length} plant{plants.length !== 1 ? "s" : ""} in your
+            garden
+          </Text>
         </View>
 
         <View className="mt-5">

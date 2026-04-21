@@ -6,10 +6,6 @@ interface ReminderCardProps {
   description: string;
   icon: keyof typeof Ionicons.glyphMap;
   iconColor?: string;
-  /** Legacy single-action button label */
-  actionLabel?: string;
-  /** Legacy single-action callback */
-  onAction?: () => void;
   /** Due date label shown below description */
   dueLabel?: string;
   /** Whether the reminder is currently due (nextDue <= today) */
@@ -25,8 +21,6 @@ export function ReminderCard({
   description,
   icon,
   iconColor = "#6B8F71",
-  actionLabel = "Select Plants",
-  onAction,
   dueLabel,
   isDue = false,
   onSnooze,
@@ -78,18 +72,6 @@ export function ReminderCard({
             </View>
           )}
         </View>
-      )}
-      {/* Legacy single-action button (used by manage screen) */}
-      {!onSnooze && onAction && (
-        <TouchableOpacity
-          onPress={onAction}
-          className="mt-3 border border-sage-accent rounded-xl py-2 items-center"
-          activeOpacity={0.7}
-        >
-          <Text className="text-sage-accent font-semibold text-sm">
-            {actionLabel}
-          </Text>
-        </TouchableOpacity>
       )}
     </View>
   );
